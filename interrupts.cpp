@@ -52,6 +52,28 @@ std::tuple<std::string, std::string, int> simulate_trace(std::vector<std::string
             ///////////////////////////////////////////////////////////////////////////////////////////
             //Add your FORK output here
 
+            //Part of cloning
+            execution += std::to_string(current_time) + ", " + std::to_string(duration_intr) + ", cloning the PCB\n";
+            current_time += duration_intr;
+
+            //cloning current PCB (like init)
+            PCB clone(current.PID + 1, current.PID, current.program_name, current.size, -1);
+            //assign to partition
+            if(!allocate_memory(&clone)) {
+                std::cerr << "ERROR! Memory allocation failed!" << std::endl;
+            }
+            //add PCB to wait queue
+            wait_queue.push_back(clone);
+            //end of cloning
+
+            //Scheduler call
+            execution += std::to_string(current_time) + ", 0, scheduler called\n";
+
+            //IRET
+            execution += std::to_string(current_time) + ", 1, IRET\n";
+            current_time += 1;
+
+            
 
 
             ///////////////////////////////////////////////////////////////////////////////////////////
@@ -90,10 +112,19 @@ std::tuple<std::string, std::string, int> simulate_trace(std::vector<std::string
             }
             i = parent_index;
 
+            //std::cout << i;
+            //getting current time and parent trace
+            system_status += "time: " + std::to_string(current_time) + "; current trace: " + trace_file[i] + "\n";
+            //every fork take a snapshot
+            system_status += print_PCB(current, wait_queue);
+
             ///////////////////////////////////////////////////////////////////////////////////////////
             //With the child's trace, run the child (HINT: think recursion)
 
-
+            //debug to see what child trace looks like
+            for(int j = 0; j < child_trace.size(); j++) {
+                std::cout << child_trace[j] << std::endl;
+            }
 
             ///////////////////////////////////////////////////////////////////////////////////////////
 
