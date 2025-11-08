@@ -187,24 +187,55 @@ std::tuple<std::string, std::string, int> simulate_trace(std::vector<std::string
                 }
             }
 
+            //trace for file size
             execution += std::to_string(current_time) + ", 0, program size is " + std::to_string(fileSize) + "Mb large\n";
 
+            //simulating loading
             execution += std::to_string(current_time) + ", " + std::to_string(15 * fileSize) + ", loading program into memory\n";
             current_time += 15 * fileSize;
 
+            //creates a new PCB and replaces child cloned in partition
             PCB cloneExec(current.PID, current.PPID, program_name, fileSize, -1);
+            //deallocates old PCB
             PCB* toDelete = &current;
             free_memory(toDelete);
 
+            //Finding free partition
             if(!allocate_memory(&cloneExec)) {
                 std::cerr << "ERROR! Memory allocation failed!" << std::endl;
             }
 
+            //set current running program
             current = cloneExec;
 
-            std::cout << print_PCB(current, wait_queue) << std::endl;
+            //mark PCB as not empty
+            //for random number
+            std::random_device rd;                
+            std::mt19937 gen(rd());               
+            std::uniform_int_distribution<> dist(1, 10);  
+            int random_num = dist(gen);
+            memory[current.partition_number - 1].code = "not empty";
+            execution += std::to_string(current_time) + ", " + std::to_string(random_num) + ", marking partition as occupied\n";
+            current_time += random_num;
 
-            std::cout << fileSize << std::endl;
+            //updating PCB
+            int random_num2 = dist(gen);
+            execution += std::to_string(current_time) + ", " + std::to_string(random_num2) + ", updating PCB\n";
+            current_time += random_num2;
+
+            //Scheduler call
+            execution += std::to_string(current_time) + ", 0, scheduler called\n";
+
+            //IRET
+            execution += std::to_string(current_time) + ", 1, IRET\n";
+            current_time += 1;
+
+
+            std::cout << print_PCB(current, wait_queue) << std::endl; //debug
+
+            std::cout << fileSize << std::endl; //debug
+
+            std::cout << memory[current.partition_number - 1].code << std::endl;
 
             system_status += "time: " + std::to_string(current_time) + "; current trace: " + trace_file[i] + "\n";
             //every fork take a snapshot
@@ -260,6 +291,9 @@ int main(int argc, char** argv) {
 
     /******************ADD YOUR VARIABLES HERE*************************/
 
+    
+
+    
 
     /******************************************************************/
 
