@@ -157,7 +157,7 @@ std::tuple<std::string, std::string, int> simulate_trace(std::vector<std::string
             current = wait_queue.front();
             wait_queue.erase(wait_queue.begin());
 
-            std::cout << print_PCB(current, wait_queue) << std::endl;
+           // std::cout << print_PCB(current, wait_queue) << std::endl;
 
             //runs child process
             auto [executionTemp, system_statusTemp, current_timeTemp] = simulate_trace(child_trace, current_time, vectors, delays, external_files, current, wait_queue);
@@ -248,11 +248,11 @@ std::tuple<std::string, std::string, int> simulate_trace(std::vector<std::string
             current_time += 1;
 
 
-            std::cout << print_PCB(current, wait_queue) << std::endl; //debug
+            //std::cout << print_PCB(current, wait_queue) << std::endl; //debug
 
-            std::cout << fileSize << std::endl; //debug
+            //std::cout << fileSize << std::endl; //debug
 
-            std::cout << memory[current.partition_number - 1].code << std::endl;
+            //std::cout << memory[current.partition_number - 1].code << std::endl;
 
             system_status += "time: " + std::to_string(current_time) + "; current trace: " + trace_file[i] + "\n";
             //every fork take a snapshot
