@@ -74,7 +74,10 @@ std::tuple<std::string, std::string, int> simulate_trace(std::vector<std::string
             current_time += 1;
 
             
-
+            //getting current time and parent trace
+            system_status += "time: " + std::to_string(current_time) + "; current trace: " + trace_file[i] + "\n";
+            //every fork take a snapshot
+            system_status += print_PCB(current, wait_queue);
 
             ///////////////////////////////////////////////////////////////////////////////////////////
 
@@ -113,10 +116,7 @@ std::tuple<std::string, std::string, int> simulate_trace(std::vector<std::string
             i = parent_index;
 
             //std::cout << i;
-            //getting current time and parent trace
-            system_status += "time: " + std::to_string(current_time) + "; current trace: " + trace_file[i] + "\n";
-            //every fork take a snapshot
-            system_status += print_PCB(current, wait_queue);
+            
 
             ///////////////////////////////////////////////////////////////////////////////////////////
             //With the child's trace, run the child (HINT: think recursion)
@@ -147,9 +147,9 @@ std::tuple<std::string, std::string, int> simulate_trace(std::vector<std::string
             */
     
             //debug to see what child trace looks like
-            for(int j = 0; j < child_trace.size(); j++) {
-                std::cout << child_trace[j] << std::endl;
-            }
+           // for(int j = 0; j < child_trace.size(); j++) {
+           //     std::cout << child_trace[j] << std::endl;
+            //}
             //now how vector trace of program1 now need to send it to simulate_trace
 
             //sets current child to running
@@ -159,12 +159,19 @@ std::tuple<std::string, std::string, int> simulate_trace(std::vector<std::string
 
             std::cout << print_PCB(current, wait_queue) << std::endl;
 
+            //runs child process
             auto [executionTemp, system_statusTemp, current_timeTemp] = simulate_trace(child_trace, current_time, vectors, delays, external_files, current, wait_queue);
+
+            execution += executionTemp;
+            current_time = current_timeTemp;
+            system_status += system_statusTemp;
 
             ///////////////////////////////////////////////////////////////////////////////////////////
 
 
         } else if(activity == "EXEC") {
+            //execution += "in EXEC for "  + current.program_name + "\n"; //debug
+
             auto [intr, time] = intr_boilerplate(current_time, 3, 10, vectors);
             current_time = time;
             execution += intr;
@@ -172,7 +179,36 @@ std::tuple<std::string, std::string, int> simulate_trace(std::vector<std::string
             ///////////////////////////////////////////////////////////////////////////////////////////
             //Add your EXEC output here
 
+            //gets size of file
+            int fileSize = 0;
+            for (external_file file : external_files) {
+                if (file.program_name == program_name) {
+                    fileSize = file.size;
+                }
+            }
 
+            execution += std::to_string(current_time) + ", 0, program size is " + std::to_string(fileSize) + "Mb large\n";
+
+            execution += std::to_string(current_time) + ", " + std::to_string(15 * fileSize) + ", loading program into memory\n";
+            current_time += 15 * fileSize;
+
+            PCB cloneExec(current.PID, current.PPID, program_name, fileSize, -1);
+            PCB* toDelete = &current;
+            free_memory(toDelete);
+
+            if(!allocate_memory(&cloneExec)) {
+                std::cerr << "ERROR! Memory allocation failed!" << std::endl;
+            }
+
+            current = cloneExec;
+
+            std::cout << print_PCB(current, wait_queue) << std::endl;
+
+            std::cout << fileSize << std::endl;
+
+            system_status += "time: " + std::to_string(current_time) + "; current trace: " + trace_file[i] + "\n";
+            //every fork take a snapshot
+            system_status += print_PCB(current, wait_queue);
 
             ///////////////////////////////////////////////////////////////////////////////////////////
 
