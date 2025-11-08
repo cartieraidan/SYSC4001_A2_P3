@@ -121,10 +121,45 @@ std::tuple<std::string, std::string, int> simulate_trace(std::vector<std::string
             ///////////////////////////////////////////////////////////////////////////////////////////
             //With the child's trace, run the child (HINT: think recursion)
 
+
+
+            /* can be used for exec not fork()
+            //Converting the trace file into a vector of strings.
+            std::vector<std::string> child_file; //trace in programX
+
+            auto [child_act, child_dur, extern_file] = parse_trace(child_trace[0]); //getting program name
+
+            std::cout << extern_file << std::endl; //debug
+            extern_file += ".txt";
+
+            // Open the file
+            std::ifstream file(extern_file);
+            //check if the file opened
+            if (!file.is_open()) {
+                std::cerr << "Error: could not open program1.txt" << std::endl;
+            } else {
+                while (std::getline(file, trace)) {
+                    child_file.push_back(trace);
+                }
+                file.close();
+            }
+
+            */
+    
             //debug to see what child trace looks like
             for(int j = 0; j < child_trace.size(); j++) {
                 std::cout << child_trace[j] << std::endl;
             }
+            //now how vector trace of program1 now need to send it to simulate_trace
+
+            //sets current child to running
+            wait_queue.push_back(current);
+            current = wait_queue.front();
+            wait_queue.erase(wait_queue.begin());
+
+            std::cout << print_PCB(current, wait_queue) << std::endl;
+
+            auto [executionTemp, system_statusTemp, current_timeTemp] = simulate_trace(child_trace, current_time, vectors, delays, external_files, current, wait_queue);
 
             ///////////////////////////////////////////////////////////////////////////////////////////
 
