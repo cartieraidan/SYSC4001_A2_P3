@@ -194,19 +194,36 @@ std::tuple<std::string, std::string, int> simulate_trace(std::vector<std::string
             execution += std::to_string(current_time) + ", " + std::to_string(15 * fileSize) + ", loading program into memory\n";
             current_time += 15 * fileSize;
 
-            //creates a new PCB and replaces child cloned in partition
-            PCB cloneExec(current.PID, current.PPID, program_name, fileSize, -1);
-            //deallocates old PCB
-            PCB* toDelete = &current;
-            free_memory(toDelete);
 
-            //Finding free partition
-            if(!allocate_memory(&cloneExec)) {
-                std::cerr << "ERROR! Memory allocation failed!" << std::endl;
+            //creates a new PCB and replaces child cloned in partition
+            
+
+            if (current.partition_number != -1) {
+                PCB cloneExec(current.PID, current.PPID, program_name, fileSize, -1);
+                //deallocates old PCB
+                PCB* toDelete = &current;
+                free_memory(toDelete);
+
+                //Finding free partition
+                if(!allocate_memory(&cloneExec)) {
+                    std::cerr << "ERROR! Memory allocation failed!" << std::endl;
+                }
+                //set current running program
+                current = cloneExec;
+            } else {
+                PCB cloneExec(0, -1, program_name, fileSize, -1);
+                //Finding free partition
+                if(!allocate_memory(&cloneExec)) {
+                    std::cerr << "ERROR! Memory allocation failed!" << std::endl;
+                }
+
+                //set current running program
+                current = cloneExec;
             }
 
-            //set current running program
-            current = cloneExec;
+    
+
+            
 
             //mark PCB as not empty
             //for random number
@@ -255,7 +272,35 @@ std::tuple<std::string, std::string, int> simulate_trace(std::vector<std::string
             ///////////////////////////////////////////////////////////////////////////////////////////
             //With the exec's trace (i.e. trace of external program), run the exec (HINT: think recursion)
 
+            auto [executionTemp, system_statusTemp, current_timeTemp] = simulate_trace(exec_traces, current_time, vectors, delays, external_files, current, wait_queue);
 
+            execution += executionTemp;
+            current_time = current_timeTemp;
+            system_status += system_statusTemp;
+
+            
+            /* does not clear out parent
+            if (current.PPID != -1) {
+
+                std::cout << "hereeeee" << std::endl;
+                for (PCB node : wait_queue) {
+                    if (current.PPID == node.PID) {
+                        wait_queue.erase(wait_queue.begin()); //might need to change
+                        free_memory(&node);
+
+                    }
+                }
+            }
+            */
+
+            free_memory(&current);
+
+            PCB cloneExec3(0, -1, program_name, fileSize, -1);
+            current = cloneExec3;
+
+            //system_status += "time: " + std::to_string(current_time) + "; current trace: " + trace_file[i] + "\n";
+            //every fork take a snapshot
+            //system_status += print_PCB(current, wait_queue);
 
             ///////////////////////////////////////////////////////////////////////////////////////////
 
