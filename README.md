@@ -12,11 +12,12 @@ source build.sh
 To run the program, use the following command:
 
 ```bash
-./bin/interrupts <trace.txt> <vector_table.txt> <device_table.txt>
+./bin/interrupts <trace.txt> <vector_table.txt> <device_table.txt> <external_files.txt>
 ```
 * replace <trace.txt> with your actual trace file.txt
 * replace <vector_table.txt> with vector table file name.txt or one provided
 * replace <device_table.txt> with device table file name.txt or one provided
+* replace <external_file.txt> with external files table
 
 ## Test Cases
 - Added 20 trace files in the `input_files` folder
